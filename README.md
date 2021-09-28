@@ -32,4 +32,4 @@ starnded
 `python APAIQ.py --input_plus='demo/test_chr21_partial.minus.wig' --input_minus='demo/test_chr21_partial.minus.wig'  --fa_file='oneLine/hg38'  --name='sample_name' --DB_file='demo/polyADB3_gencode.chr21.pAs.txt'  --model='model/snu398_model.ckpt'`
 
 
-if wig file are not normalized,use option --depth=10 for 10 millions total mapped reads
+if wig file are not normalized,use option --depth=10 for 10 millions total single-end mapped reads, 5 millions total paired-end mapped reads
