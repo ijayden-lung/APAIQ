@@ -33,7 +33,7 @@ def merge_predict_pos(forward_pas_dict,backward_pas_dict):
 		maxPoint2 = backward_pas_dict[pos2][0]
 		start1 = forward_pas_dict[pos1][1]
 		start2 = backward_pas_dict[pos2][1]
-		if(pos2>pos1):
+		if(pos2>=pos1):
 			i += 1
 		elif(start1 > start2):
 			j += 1

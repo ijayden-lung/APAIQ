@@ -74,7 +74,7 @@ def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name
 	out_file = '%s/%s.predicted.txt' %(out_dir,name)
 	ww = open(out_file,'w')
 	if(DB_file is not None): 
-		ww.write('predicted_pasid\tdb_diff\tdb_pasid\tscore\n')
+		ww.write('predicted_pasid\tdb_pasid\tdb_diff\tscore\n')
 	else:
 		ww.write('predicted_pasid\tscore\n')
 	ww.close()
