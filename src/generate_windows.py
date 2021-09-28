@@ -50,7 +50,7 @@ def write_file(root_dir,dict_line,chromosome,strand,save_block,start,pre_pos,cou
 	ww.close()
 	
 
-def split(root_dir,block_length,input_file,reference,window,chromosome,strand,name):
+def split(root_dir,block_length,input_file,reference,window,chromosome,strand,name,depth):
 	
 	wig_file = open(input_file, "r")
 	lines = wig_file.readlines()
@@ -77,6 +77,7 @@ def split(root_dir,block_length,input_file,reference,window,chromosome,strand,na
 		if(base == 'N'):
 			continue
 		rpm = float(rpm)
+		rpm /= depth
 		if(rpm < 0):
 			rpm = -rpm
 		count += 1
@@ -128,6 +129,7 @@ def args():
 	parser.add_argument('--keep_temp',default=None,help='if you want to keep temporary file, set to "yes"')
 	parser.add_argument('--window', default=201, type=int, help='input length')
 	parser.add_argument('--name', default='sample',help='sample name')
+	parser.add_argument('--depth', default=1, type=float,help='total number of mapped reads( in millions)')
   
 	argv = parser.parse_args()
 
@@ -139,11 +141,12 @@ def args():
 	keep_temp =  argv.keep_temp
 	window = argv.window
 	name= argv.name
+	depth = argv.depth
 
-	return out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name
+	return out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,depth
 
 
-def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name):
+def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,depth):
 	block_length = 1e6
 	#window /= 1.5 ####No need more extendsion
 	#window = int(window)
@@ -164,7 +167,7 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 			basename = wig_file.split('/')[-1]
 			chromosome = basename.split('_')[0]
 			reference = get_genome_sequence('%s.%s.fa'%(fa_file,chromosome))
-			split(root_dir,block_length,wig_file,reference,window,chromosome,strand,name)
+			split(root_dir,block_length,wig_file,reference,window,chromosome,strand,name,depth)
 		block_files = glob.glob(root_dir+"/*+*")
 		for block in block_files:
 			minus_block = block.replace('+','-')
@@ -177,7 +180,7 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 			basename = wig_file.split('/')[-1]
 			chromosome = basename.split('_')[0]
 			reference = get_genome_sequence('%s.%s.fa'%(fa_file,chromosome))
-			split(root_dir,block_length,wig_file,reference,window,chromosome,strand,name)
+			split(root_dir,block_length,wig_file,reference,window,chromosome,strand,name,depth)
 	if(input_minus is not None):
 		strand = '-'
 		split_chr(root_dir,input_minus,strand)
@@ -186,7 +189,7 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 			basename = wig_file.split('/')[-1]
 			chromosome = basename.split('_')[0]
 			reference = get_genome_sequence('%s.%s.fa'%(fa_file,chromosome))
-			split(root_dir,block_length,wig_file,reference,window,chromosome,strand,name)
+			split(root_dir,block_length,wig_file,reference,window,chromosome,strand,name,depth)
 	print("Finished merging coverage and sequence information")
 	os.system('rm *%s/*.wig'%root_dir)
 

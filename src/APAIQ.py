@@ -25,6 +25,7 @@ def args():
 	parser.add_argument('--threshold', default=0,type=int,help='peak length lower than threshold will be fiter out')
 	parser.add_argument('--penality', default=1,type=int,help='penality for prediction score lower than 0.5')
 	parser.add_argument('--DB_file', default=None, help='polyA database file')
+	parser.add_argument('--depth', default=1, type=float,help='total number of mapped reads( in millions)')
 	
   
 	argv = parser.parse_args()
@@ -42,16 +43,17 @@ def args():
 	threshold = argv.threshold
 	penality  = argv.penality
 	DB_file = argv.DB_file
-	return out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,model,rst,threshold,penality,DB_file
+	depth   = argv.depth
+	return out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,model,rst,threshold,penality,DB_file,depth
 
-def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,model,rst,threshold,penality,DB_file):
+def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,model,rst,threshold,penality,DB_file,depth):
 
 	if not os.path.exists(out_dir):
 		os.makedirs(out_dir)
 
 	out_dir = out_dir+'/'+name
 	####Generate sliding windlows
-	Generate_windows(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name)
+	Generate_windows(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,depth)
 	
 	data_dir = out_dir+'/data'
 	data_files = glob.glob(data_dir+"/*")
