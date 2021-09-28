@@ -111,7 +111,7 @@ def Scan_Backward(baseName,threshold,penality,out_dir):
 	out=out_dir+"/maxSum/%s.backward.%d.%d.txt"%(baseName,threshold,penality)
 
 	maxSum(predict,threshold,penality,out)
-	print("End backward scaning %s"%predict)
+	print("End backward scaning %s\n"%predict)
 
 if __name__ == "__main__":
 	Scan_Backward(*args())

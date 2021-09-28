@@ -12,7 +12,7 @@ from postprocess import Postprocess
 
 def args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--out_dir', default=None, help='out dir')
+	parser.add_argument('--out_dir', default='out_dir', help='out dir')
 	parser.add_argument('--input_file', default=None, help='unstranded wig file')
 	parser.add_argument('--input_plus', default=None, help='plus strand wig file')
 	parser.add_argument('--input_minus', default=None, help='minus strand wig file')
@@ -73,7 +73,10 @@ def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name
 
 	out_file = '%s/%s.predicted.txt' %(out_dir,name)
 	ww = open(out_file,'w')
-	ww.write('predicted_pasid\tdb_diff\tdb_pasid\tscore\n')
+	if(DB_file is not None): 
+		ww.write('predicted_pasid\tdb_diff\tdb_pasid\tscore\n')
+	else:
+		ww.write('predicted_pasid\tscore\n')
 	ww.close()
 	os.system('cat %s/maxSum/*bidirection* >>%s'%(out_dir,out_file))
 	if(keep_temp != 'yes'):

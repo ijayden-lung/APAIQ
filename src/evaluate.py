@@ -108,9 +108,10 @@ def Evaluate(model,out_dir,rst,window,baseName,keep_temp):
 		os.makedirs(out_dir) 
 	out="%s/%s.txt"%(out_dir,baseName)
 
-	print("Start Evaluating %s"%data)
+	print("Start processing data")
 	seq_data,cov_data,pas_id = dataProcessing(data,window,rst)
-	print("Finished processing data")
+	print("Finish processing data")
+	print("Start Evaluating %s"%data)
 
 	keras_Model = PolyA_CNN(window)
 	keras_Model.load_weights(model)
@@ -120,7 +121,7 @@ def Evaluate(model,out_dir,rst,window,baseName,keep_temp):
 	for i in range(len(pas_id)):
 		OUT.write('%s\t%s\n'%(str(pas_id[i]),str(pred[i][0])))
 	OUT.close()
-	print("End Evaluation")
+	print("End Evaluation\n")
 
 	if (keep_temp != "yes"):
 		os.system('rm %s'%data)

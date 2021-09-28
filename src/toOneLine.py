@@ -30,7 +30,7 @@ def main(fa_file,species):
 				os.system('rm oneLine/%s.%s.fa'%(species,chro))
 				continue
 			else:
-				ww.write('%s\n'%line)
+				#ww.write('%s\n'%line)
 				skip = False
 		else:
 			if(skip):

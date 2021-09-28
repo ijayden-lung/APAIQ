@@ -15,7 +15,7 @@ import argparse
 def write_file(root_dir,dict_line,chromosome,strand,save_block,start,pre_pos,count,reference,window,name):
 	ww = open(root_dir+'/%s.%s_%s_%d'%(name,chromosome,strand,save_block),'w')
 	print('writing file '+root_dir+'/%s_%s_%d_%d-%d'%(chromosome,strand,save_block,start,pre_pos))
-	pre_pos = 0
+	pre_pos = 1
 	pos_array = list(dict_line.keys())
 	#for pos,val in dict_line.items():
 	for i,pos in enumerate(pos_array):
@@ -26,9 +26,8 @@ def write_file(root_dir,dict_line,chromosome,strand,save_block,start,pre_pos,cou
 		while(pos-pre_pos>=1):
 			if pre_pos not in dict_line.keys():
 				pre_base = reference[pre_pos-1]
-				if(pre_base == 'N'):
-					continue
-				ww.write('%s:%d:%s\t%d\t%s\n'%(chromosome,pre_pos,strand,0,pre_base))
+				if(pre_base != 'N'):
+					ww.write('%s:%d:%s\t%d\t%s\n'%(chromosome,pre_pos,strand,0,pre_base))
 			pre_pos += 1
 			
 		ww.write('%s:%d:%s\t%s\n'%(chromosome,pos,strand,val))
@@ -43,9 +42,8 @@ def write_file(root_dir,dict_line,chromosome,strand,save_block,start,pre_pos,cou
 		while(post_pos - pre_pos>=1):
 			if pre_pos not in dict_line.keys():
 				pre_base = reference[pre_pos-1]
-				if(pre_base == 'N'):
-					continue
-				ww.write('%s:%d:%s\t%d\t%s\n'%(chromosome,pre_pos,strand,0,pre_base))
+				if(pre_base != 'N'):
+					ww.write('%s:%d:%s\t%d\t%s\n'%(chromosome,pre_pos,strand,0,pre_base))
 			pre_pos += 1
 			
 	dict_line.clear()
@@ -78,7 +76,6 @@ def split(root_dir,block_length,input_file,reference,window,chromosome,strand,na
 		base = reference[pos-1]
 		if(base == 'N'):
 			continue
-		#base = reference[chromosome][pos-1]
 		rpm = float(rpm)
 		if(rpm < 0):
 			rpm = -rpm
@@ -148,7 +145,8 @@ def args():
 
 def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name):
 	block_length = 1e6
-	window /= 1.5 ####No need more extendsion
+	#window /= 1.5 ####No need more extendsion
+	#window = int(window)
 	
 	if not os.path.exists(root_dir):
 		os.makedirs(root_dir) 
@@ -158,9 +156,6 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 		os.makedirs(root_dir) 
 
 
-	#all_ref = Fasta(fa_file)
-	#print("Finished getting reference sequence from "+fa_file)
-
 	if(input_file is not None):
 		strand = '+'
 		split_chr(root_dir,input_file,strand)
@@ -169,7 +164,6 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 			basename = wig_file.split('/')[-1]
 			chromosome = basename.split('_')[0]
 			reference = get_genome_sequence('%s.%s.fa'%(fa_file,chromosome))
-			#reference=all_ref[chromosome]
 			split(root_dir,block_length,wig_file,reference,window,chromosome,strand,name)
 		block_files = glob.glob(root_dir+"/*+*")
 		for block in block_files:

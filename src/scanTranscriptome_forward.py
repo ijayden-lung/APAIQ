@@ -111,7 +111,7 @@ def Scan_Forward(baseName,threshold,penality,out_dir):
 	print("Start forward scaning %s"%predict)
 	out=out_dir+"/maxSum/%s.forward.%d.%d.txt"%(baseName,threshold,penality)
 	maxSum(predict,threshold,penality,out)
-	print("End forward scaning %s"%predict)
+	print("End forward scaning %s\n"%predict)
 
 if __name__ == "__main__":
 	Scan_Forward(*args())
