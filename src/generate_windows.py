@@ -115,6 +115,8 @@ def split_chr(root_dir,input_file,strand):
 			if(len(chromosome)>3 or 'Y' in chromosome or 'M' in chromosome):
 				continue
 
+			if ('chr' not in chromosome):
+				chromosome = 'chr'+chromosome
 			out = open(root_dir+'/%s_%s.wig'%(chromosome,strand),'w')
 		else:
 			out.write("%s\n"%line)

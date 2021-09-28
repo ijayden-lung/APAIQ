@@ -5,11 +5,13 @@ import os
 def args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--fa_file',default=None,help='path to fa file to generate chromosome separte oneline file')
+	parser.add_argument('--species',default='hg38',help='path to fa file to generate chromosome separte oneline file')
 	argv = parser.parse_args()
 	fa_file = argv.fa_file
-	return fa_file
+	species = argv.species
+	return fa_file,species
 
-def main(fa_file):
+def main(fa_file,species):
 	fa = open(fa_file,'r')
 	if not os.path.exists('oneLine'):
 		os.makedirs('oneLine')
@@ -19,11 +21,15 @@ def main(fa_file):
 		if('>' in line):
 			chro = line.split(' ')[0]
 			chro = chro[1:]
-			if(len(chro)>3 or 'M' in chro):
+			if('chr' not in chro):
+				chro = 'chr'+chro
+
+			ww = open('oneLine/%s.%s.fa'%(species,chro),'w')
+			if(len(chro)>6 or 'M' in chro):
 				skip = True
+				os.system('rm oneLine/%s.%s.fa'%(species,chro))
 				continue
 			else:
-				ww = open('oneLine/'+chro+'.fa','w')
 				ww.write('%s\n'%line)
 				skip = False
 		else:
@@ -34,4 +40,4 @@ def main(fa_file):
 	ww.close()
 
 if __name__ == "__main__":
-	main(args())
+	main(*args())
