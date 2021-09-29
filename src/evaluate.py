@@ -45,13 +45,17 @@ def collpase(pas_id,array,rst=0):
 def dataProcessing(scan_file,window,rst):
 	
 	extend  = int(window/2)
-	data1 = []
-	data2 = []
-	PASID = []
 	alphabet = np.array(['A', 'T', 'C', 'G'])
 	
 	f = open(scan_file,'r')
 	lines = f.readlines()
+	data1 = []
+	data2 = []
+	PASID = []
+	##data1 = np.zeros([len(lines),window,4])
+	#data2 = np.zeros([len(lines),window,1])
+	#PASID = np.empty(len(lines),dtype='object')
+	#index = np.zeros(len(lines),dtype=bool)
 	
 	#n_pos = 0 #position containing N
 	for i,line in enumerate(lines):
@@ -71,13 +75,24 @@ def dataProcessing(scan_file,window,rst):
 				sequence = list(sequence)
 				seq = np.array(sequence, dtype = '|U1').reshape(-1,1)
 				seq_data = (seq == alphabet).astype(np.float32)
-				data1.append(seq_data)
 				coverage = np.array(coverage).astype(np.float32)
+				data1.append(seq_data)
 				data2.append(coverage)
 				PASID.append(pas_id)
+				#data1[i,:,:] = seq_data
+				#data2[i,:,:] =  coverage.reshape([-1,1])
+				#PASID[i] = pas_id
+				#index[i] = True
+
 	data1 = np.stack(data1).reshape([-1, window, 4])
 	data2 = np.stack(data2).reshape([-1, window, 1])
 	PASID = np.array(PASID)
+	#data1 = data1[index] 
+	#data2 = data2[index]
+	#PASID = PASID[index]
+	print(data1.shape)
+	print(data2.shape)
+	#print(PASID)
 	
 	f.close()
 	return data1 , data2,  PASID 

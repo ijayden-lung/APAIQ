@@ -104,42 +104,42 @@ def get_genome_sequence(fa_file):
 	return line
 
 def split_chr(root_dir,input_file,strand):
-	wig_file = open(input_file, "r")
-	for line in wig_file.readlines():
-		line = line.rstrip('\n')
-		if('variableStep' in line):
-			info = line.split(' ')
-			chromosome = info[1].split('chrom=')[1]
-			if(len(chromosome)>4 or 'Y' in chromosome or 'M' in chromosome):
-				continue
+	with open(input_file, "r") as wig_file:
+		for line in wig_file.readlines():
+			line = line.rstrip('\n')
+			#if('variableStep' in line):
+			if not line[0].isdigit():
+				info = line.split(' ')
+				chromosome = info[1].split('chrom=')[1]
+				if ('chr' not in chromosome):
+					chromosome = 'chr'+chromosome
+				if(len(chromosome)>5 or 'Y' in chromosome or 'M' in chromosome):
+					continue
 
-			if ('chr' not in chromosome):
-				chromosome = 'chr'+chromosome
-			out = open(root_dir+'/%s_%s.wig'%(chromosome,strand),'w')
-		else:
-			out.write("%s\n"%line)
+				out = open(root_dir+'/%s_%s.wig'%(chromosome,strand),'w')
+			else:
+				out.write("%s\n"%line)
 
 def split_chr_bedGraph(root_dir,input_file,strand):
-	wig_file = open(input_file, "r")
 	chr_dict = dict()
-	for line in wig_file.readlines():
-		line = line.rstrip('\n')
-		chromosome,start,end,val = line.split('\t')
-		if ('chr' not in chromosome):
-			chromosome = 'chr'+chromosome
-		if(len(chromosome)>4 or 'Y' in chromosome or 'M' in chromosome):
-			continue
-		pos1 = int(start)+1
-		pos2 = int(end)+1
-		if chromosome not in chr_dict.keys():
-			out = open(root_dir+'/%s_%s.wig'%(chromosome,strand),'w')
-			for pos in range(pos1,pos2):
-				out.write("%d\t%s\n"%(i,val))
-		else:
-			for pos in range(pos1,pos2):
-				out.write("%d\t%s\n"%(i,val))
-		chr_dict[chromosome] = ''
-	out.close()
+	with open(input_file, "r") as bg_file:
+		for line in bg_file.readlines():
+			line = line.rstrip('\n')
+			chromosome,start,end,val = line.split('\t')
+			if ('chr' not in chromosome):
+				chromosome = 'chr'+chromosome
+			if(len(chromosome)>5 or 'Y' in chromosome or 'M' in chromosome):
+				continue
+			pos1 = int(start)+1
+			pos2 = int(end)+1
+			if chromosome not in chr_dict.keys():
+				chr_dict[chromosome] = ''
+				out = open(root_dir+'/%s_%s.wig'%(chromosome,strand),'w')
+				for pos in range(pos1,pos2):
+					out.write("%d\t%s\n"%(pos,val))
+			else:
+				for pos in range(pos1,pos2):
+					out.write("%d\t%s\n"%(pos,val))
 
 def args():
 	parser = argparse.ArgumentParser()
@@ -170,8 +170,8 @@ def args():
 
 def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,depth):
 	block_length = 1e6
-	#window /= 1.5 ####No need more extendsion
-	#window = int(window)
+	window /= 1.5 ####No need more extendsion
+	window = int(window)
 	
 	if not os.path.exists(root_dir):
 		os.makedirs(root_dir) 
