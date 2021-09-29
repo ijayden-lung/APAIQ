@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import os
+import os,sys
 import glob
 from collections import OrderedDict,defaultdict
 import pipes
@@ -77,7 +77,7 @@ def split(root_dir,block_length,input_file,reference,window,chromosome,strand,na
 		if(base == 'N'):
 			continue
 		rpm = float(rpm)
-		rpm /= depth
+		rpm /= depth ####NORMALIZED TO RPM
 		if(rpm < 0):
 			rpm = -rpm
 		count += 1
@@ -118,6 +118,28 @@ def split_chr(root_dir,input_file,strand):
 			out = open(root_dir+'/%s_%s.wig'%(chromosome,strand),'w')
 		else:
 			out.write("%s\n"%line)
+
+def split_chr_bedGraph(root_dir,input_file,strand):
+	wig_file = open(input_file, "r")
+	chr_dict = dict()
+	for line in wig_file.readlines():
+		line = line.rstrip('\n')
+		chromosome,start,end,val = line.split('\t')
+		if ('chr' not in chromosome):
+			chromosome = 'chr'+chromosome
+		if(len(chromosome)>4 or 'Y' in chromosome or 'M' in chromosome):
+			continue
+		pos1 = int(start)+1
+		pos2 = int(end)+1
+		if chromosome not in chr_dict.keys():
+			out = open(root_dir+'/%s_%s.wig'%(chromosome,strand),'w')
+			for pos in range(pos1,pos2):
+				out.write("%d\t%s\n"%(i,val))
+		else:
+			for pos in range(pos1,pos2):
+				out.write("%d\t%s\n"%(i,val))
+		chr_dict[chromosome] = ''
+	out.close()
 
 def args():
 	parser = argparse.ArgumentParser()
@@ -161,7 +183,14 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 
 	if(input_file is not None):
 		strand = '+'
-		split_chr(root_dir,input_file,strand)
+		if('wig' in input_file):
+			split_chr(root_dir,input_file,strand)
+		elif('bedGraph' in input_file):
+			split_chr_bedGraph(root_dir,input_file,strand)
+		else:
+			sys.exit("input file extension should be wig or bedGraph")
+
+
 		wig_chr_files = glob.glob(root_dir+"/*"+strand+".wig")
 		for wig_file in wig_chr_files:
 			basename = wig_file.split('/')[-1]
@@ -174,7 +203,12 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 			os.system('cp %s %s'%(block,minus_block))
 	if(input_plus is not None):
 		strand = '+'
-		split_chr(root_dir,input_plus,strand)
+		if('wig' in input_plus):
+			split_chr(root_dir,input_plus,strand)
+		elif('bedGraph' in input_plus):
+			split_chr_bedGraph(root_dir,input_plus,strand)
+		else:
+			sys.exit("input file extension should be wig or bedGraph")
 		wig_chr_files = glob.glob(root_dir+"/*"+strand+".wig")
 		for wig_file in wig_chr_files:
 			basename = wig_file.split('/')[-1]
@@ -183,7 +217,12 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 			split(root_dir,block_length,wig_file,reference,window,chromosome,strand,name,depth)
 	if(input_minus is not None):
 		strand = '-'
-		split_chr(root_dir,input_minus,strand)
+		if('wig' in input_minus):
+			split_chr(root_dir,input_minus,strand)
+		elif('bedGraph' in input_minus):
+			split_chr_bedGraph(root_dir,input_minus,strand)
+		else:
+			sys.exit("input file extension should be wig or bedGraph")
 		wig_chr_files = glob.glob(root_dir+"/*"+strand+".wig")
 		for wig_file in wig_chr_files:
 			basename = wig_file.split('/')[-1]
@@ -191,7 +230,7 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 			reference = get_genome_sequence('%s.%s.fa'%(fa_file,chromosome))
 			split(root_dir,block_length,wig_file,reference,window,chromosome,strand,name,depth)
 	print("Finished merging coverage and sequence information")
-	os.system('rm *%s/*.wig'%root_dir)
+	#os.system('rm *%s/*.wig'%root_dir)
 
 
 
