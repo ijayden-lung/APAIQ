@@ -110,7 +110,7 @@ def split_chr(root_dir,input_file,strand):
 		if('variableStep' in line):
 			info = line.split(' ')
 			chromosome = info[1].split('chrom=')[1]
-			if(len(chromosome)>3 or 'Y' in chromosome or 'M' in chromosome):
+			if(len(chromosome)>4 or 'Y' in chromosome or 'M' in chromosome):
 				continue
 
 			if ('chr' not in chromosome):
