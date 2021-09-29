@@ -53,7 +53,7 @@ def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name
 
 	out_dir = out_dir+'/'+name
 	####Generate sliding windlows
-	#Generate_windows(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,depth)
+	Generate_windows(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,depth)
 	
 	data_dir = out_dir+'/data'
 	data_files = glob.glob(data_dir+"/*")
@@ -62,8 +62,8 @@ def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name
 			continue
 		baseName = data.split('/')[-1]
 		Evaluate(model,out_dir,rst,window,baseName,keep_temp)
-		#Scan_Forward(baseName,threshold,penality,out_dir)
-		#Scan_Backward(baseName,threshold,penality,out_dir)
+		Scan_Forward(baseName,threshold,penality,out_dir)
+		Scan_Backward(baseName,threshold,penality,out_dir)
 		if(keep_temp != 'yes'):
 			predict_file = out_dir+'/predict/'+baseName+'.txt'
 			os.system('rm %s'%predict_file)

@@ -230,7 +230,7 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 			reference = get_genome_sequence('%s.%s.fa'%(fa_file,chromosome))
 			split(root_dir,block_length,wig_file,reference,window,chromosome,strand,name,depth)
 	print("Finished merging coverage and sequence information")
-	#os.system('rm *%s/*.wig'%root_dir)
+	os.system('rm *%s/*.wig'%root_dir)
 
 
 

@@ -11,11 +11,13 @@ from extract_coverage_from_scanGenome import check
 
 
 def collpase(pas_id,array,rst=0):
+	#complement = {'A':'T','T':'A','C':'G','G':'C'}
 	
 	sequence = ''
-	coverage = []
+	#sequence = []
+	coverage = np.zeros(len(array))
 	contain_N = False
-	for line in array:
+	for i,line in enumerate(array):
 		line = line.rstrip('\n')
 		_,rpm,base = line.split('\t')
 		base = base.upper()
@@ -23,14 +25,20 @@ def collpase(pas_id,array,rst=0):
 			contain_N = True
 			break
 		sequence += base
-		coverage.append(rpm)
+		#sequence.append(base)
+		#coverage.append(rpm)
+		coverage[i] = rpm
 	
 	if(not contain_N):
 		chromosome,pos,strand = pas_id.split(':')
 		if(strand == "-"):
 			sequence = Seq(sequence)
 			sequence = sequence.reverse_complement()
-			coverage.reverse()
+			#sequence = [complement[base] for base in sequence]
+			#sequence.reverse()
+
+			#coverage.reverse()
+			coverage = coverage[::-1]
 		trimMean = TrimmedMean([float(coverage[i]) for i in range(int(len(coverage)/2))])
 		if(trimMean>=rst):
 			return sequence,coverage
@@ -90,9 +98,6 @@ def dataProcessing(scan_file,window,rst):
 	#data1 = data1[index] 
 	#data2 = data2[index]
 	#PASID = PASID[index]
-	print(data1.shape)
-	print(data2.shape)
-	#print(PASID)
 	
 	f.close()
 	return data1 , data2,  PASID 
