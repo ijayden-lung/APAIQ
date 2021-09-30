@@ -15,9 +15,11 @@ def collpase(pas_id,array,rst=0):
 	
 	sequence = ''
 	#sequence = []
-	coverage = np.zeros(len(array))
+	#coverage = np.zeros(len(array))
+	coverage = []
 	contain_N = False
-	for i,line in enumerate(array):
+	#for i,line in enumerate(array):
+	for line in array:
 		line = line.rstrip('\n')
 		_,rpm,base = line.split('\t')
 		base = base.upper()
@@ -26,8 +28,8 @@ def collpase(pas_id,array,rst=0):
 			break
 		sequence += base
 		#sequence.append(base)
-		#coverage.append(rpm)
-		coverage[i] = rpm
+		coverage.append(rpm)
+		#coverage[i] = rpm
 	
 	if(not contain_N):
 		chromosome,pos,strand = pas_id.split(':')
@@ -67,6 +69,7 @@ def dataProcessing(scan_file,window,rst):
 	
 	#n_pos = 0 #position containing N
 	for i,line in enumerate(lines):
+	#for line in f.readlines():
 		line = line.rstrip('\n')
 		pas_id,_,base = line.split('\t')
 		
