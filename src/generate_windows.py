@@ -185,7 +185,7 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 		strand = '+'
 		if('wig' in input_file):
 			split_chr(root_dir,input_file,strand)
-		elif('bedGraph' in input_file):
+		elif('bedgraph' in input_file.lower()):
 			split_chr_bedGraph(root_dir,input_file,strand)
 		else:
 			sys.exit("input file extension should be wig or bedGraph")
@@ -205,7 +205,7 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 		strand = '+'
 		if('wig' in input_plus):
 			split_chr(root_dir,input_plus,strand)
-		elif('bedGraph' in input_plus):
+		elif('bedgraph' in input_plus.lower()):
 			split_chr_bedGraph(root_dir,input_plus,strand)
 		else:
 			sys.exit("input file extension should be wig or bedGraph")
@@ -219,7 +219,7 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 		strand = '-'
 		if('wig' in input_minus):
 			split_chr(root_dir,input_minus,strand)
-		elif('bedGraph' in input_minus):
+		elif('bedgraph' in input_minus.lower()):
 			split_chr_bedGraph(root_dir,input_minus,strand)
 		else:
 			sys.exit("input file extension should be wig or bedGraph")

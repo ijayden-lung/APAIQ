@@ -57,6 +57,8 @@ def annotated(DB_file,pas_dict,chromosome,strand):
 	with open(DB_file,'r') as f:
 		for line in f:
 			pas_id,pas_type,chro,pos,srd = line.split('\t')[0:5]
+			if(not pos.isdigit()):
+				continue
 			pos = int(pos)
 			if('chr' not in chro):
 				chro = 'chr'+chro
