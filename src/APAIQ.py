@@ -53,7 +53,7 @@ def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name
 
 	out_dir = out_dir+'/'+name
 	####Generate sliding windlows
-	#Generate_windows(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,depth)
+	Generate_windows(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,depth)
 	
 	data_dir = out_dir+'/data'
 	data_files = glob.glob(data_dir+"/*")
