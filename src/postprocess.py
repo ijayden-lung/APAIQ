@@ -108,6 +108,8 @@ def Postprocess(DB_file,baseName,threshold,penality,out_dir):
 	_,block = baseName.split('.')
 	chromosome,strand,_ = block.split('_')
 
+	if(out_dir[-1] == '/'):
+		out_dir = out_dir[0:-1]
 	forward_file=out_dir+"/maxSum/%s.forward.%d.%d.txt"%(baseName,threshold,penality)
 	forward_pas_dict = get_predict_score(forward_file,threshold)
 	backward_file=out_dir+"/maxSum/%s.backward.%d.%d.txt"%(baseName,threshold,penality)

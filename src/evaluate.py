@@ -125,6 +125,8 @@ def args():
 	return model,out_dir,rst,window,baseName,keep_temp
 
 def Evaluate(model,out_dir,rst,window,baseName,keep_temp):
+	if(out_dir[-1] == '/'):
+		out_dir = out_dir[0:-1]
 	data="%s/data/%s"%(out_dir,baseName)
 	out_dir = out_dir+'/predict'
 	if not os.path.exists(out_dir):

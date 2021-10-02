@@ -103,6 +103,8 @@ def args():
 
 
 def Scan_Forward(baseName,threshold,penality,out_dir):
+	if(out_dir[-1] == '/'):
+		out_dir = out_dir[0:-1]
 	new_dir = out_dir+'/maxSum'
 	if not os.path.exists(new_dir):
 		os.makedirs(new_dir) 

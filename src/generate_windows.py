@@ -173,6 +173,8 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 	window /= 1.5 ####No need more extendsion
 	window = int(window)
 	
+	if(root_dir[-1] == '/'):
+		root_dir = root_dir[0:-1]
 	if not os.path.exists(root_dir):
 		os.makedirs(root_dir) 
 

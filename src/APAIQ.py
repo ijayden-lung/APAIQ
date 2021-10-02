@@ -48,6 +48,9 @@ def args():
 
 def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,model,rst,threshold,penality,DB_file,depth):
 
+	if(out_dir[-1] == '/'):
+		out_dir = out_dir[0:-1]
+
 	if not os.path.exists(out_dir):
 		os.makedirs(out_dir)
 
