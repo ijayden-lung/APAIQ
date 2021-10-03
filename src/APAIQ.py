@@ -46,6 +46,24 @@ def args():
 	depth   = argv.depth
 	return out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,model,rst,threshold,penality,DB_file,depth
 
+
+
+def run_single_block(data,model,out_dir,rst,window,keep_temp,threshold,penality,DB_file):
+	if 'wig' not in data:
+		baseName = data.split('/')[-1]
+		Evaluate(model,out_dir,rst,window,baseName,keep_temp)
+		Scan_Forward(baseName,threshold,penality,out_dir)
+		Scan_Backward(baseName,threshold,penality,out_dir)
+		if(keep_temp != 'yes'):
+			predict_file = out_dir+'/predict/'+baseName+'.txt'
+			os.system('rm %s'%predict_file)
+		Postprocess(DB_file,baseName,threshold,penality,out_dir)
+		if(keep_temp != 'yes'):
+			forward_file=out_dir+"/maxSum/%s.forward.%d.%d.txt"%(baseName,threshold,penality)
+			backward_file=out_dir+"/maxSum/%s.backward.%d.%d.txt"%(baseName,threshold,penality)
+			os.system('rm %s %s'%(forward_file,backward_file))
+
+
 def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,model,rst,threshold,penality,DB_file,depth):
 
 	if(out_dir[-1] == '/'):
@@ -61,20 +79,7 @@ def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name
 	data_dir = out_dir+'/data'
 	data_files = glob.glob(data_dir+"/*")
 	for data in data_files:
-		if 'wig' in data:
-			continue
-		baseName = data.split('/')[-1]
-		Evaluate(model,out_dir,rst,window,baseName,keep_temp)
-		Scan_Forward(baseName,threshold,penality,out_dir)
-		Scan_Backward(baseName,threshold,penality,out_dir)
-		if(keep_temp != 'yes'):
-			predict_file = out_dir+'/predict/'+baseName+'.txt'
-			os.system('rm %s'%predict_file)
-		Postprocess(DB_file,baseName,threshold,penality,out_dir)
-		if(keep_temp != 'yes'):
-			forward_file=out_dir+"/maxSum/%s.forward.%d.%d.txt"%(baseName,threshold,penality)
-			backward_file=out_dir+"/maxSum/%s.backward.%d.%d.txt"%(baseName,threshold,penality)
-			os.system('rm %s %s'%(forward_file,backward_file))
+		run_single_block(data,model,out_dir,rst,window,keep_temp,threshold,penality,DB_file)
 
 	out_file = '%s/%s.predicted.txt' %(out_dir,name)
 	ww = open(out_file,'w')

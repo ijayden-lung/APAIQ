@@ -120,10 +120,12 @@ def split_chr(root_dir,input_file,strand):
 			else:
 				out.write("%s\n"%line)
 
-def split_chr_bedGraph(root_dir,input_file,strand):
+def split_chr_bedGraph(root_dir,input_file,strand,window):
 	chr_dict = dict()
 	with open(input_file, "r") as bg_file:
-		for line in bg_file.readlines():
+		lines = bg_file.readlines()
+		#for line in bg_file.readlines():
+		for i,line in enumerate(lines):
 			line = line.rstrip('\n')
 			chromosome,start,end,val = line.split('\t')
 			if ('chr' not in chromosome):
@@ -132,6 +134,16 @@ def split_chr_bedGraph(root_dir,input_file,strand):
 				continue
 			pos1 = int(start)+1
 			pos2 = int(end)+1
+			if(i>0 and i< len(line)-1):
+				pre_line = lines[i-1].rstrip('\n')
+				nex_line = lines[i+1].rstrip('\n')
+				_,_,pre_pos,_ = pre_line.split('\t')			
+				_,nex_pos,_,_ = nex_line.split('\t')
+				pre_pos = int(pre_pos)
+				nex_pos = int(nex_pos)
+				if(nex_pos-pre_pos>window and pos2-pos1<window*0.2):
+					continue
+
 			if chromosome not in chr_dict.keys():
 				chr_dict[chromosome] = ''
 				out = open(root_dir+'/%s_%s.wig'%(chromosome,strand),'w')
@@ -188,7 +200,7 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 		if('wig' in input_file):
 			split_chr(root_dir,input_file,strand)
 		elif('bedgraph' in input_file.lower()):
-			split_chr_bedGraph(root_dir,input_file,strand)
+			split_chr_bedGraph(root_dir,input_file,strand,window)
 		else:
 			sys.exit("input file extension should be wig or bedGraph")
 
@@ -208,7 +220,7 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 		if('wig' in input_plus):
 			split_chr(root_dir,input_plus,strand)
 		elif('bedgraph' in input_plus.lower()):
-			split_chr_bedGraph(root_dir,input_plus,strand)
+			split_chr_bedGraph(root_dir,input_plus,strand,window)
 		else:
 			sys.exit("input file extension should be wig or bedGraph")
 		wig_chr_files = glob.glob(root_dir+"/*"+strand+".wig")
@@ -222,7 +234,7 @@ def Generate_windows(root_dir,input_file,input_plus,input_minus,fa_file,keep_tem
 		if('wig' in input_minus):
 			split_chr(root_dir,input_minus,strand)
 		elif('bedgraph' in input_minus.lower()):
-			split_chr_bedGraph(root_dir,input_minus,strand)
+			split_chr_bedGraph(root_dir,input_minus,strand,window)
 		else:
 			sys.exit("input file extension should be wig or bedGraph")
 		wig_chr_files = glob.glob(root_dir+"/*"+strand+".wig")
