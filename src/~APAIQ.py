@@ -8,7 +8,10 @@ from evaluate import Evaluate
 from scanTranscriptome_forward import Scan_Forward
 from scanTranscriptome_reverse import Scan_Backward
 from postprocess import Postprocess
-
+#
+from multiprocessing import Pool
+import datetime
+#
 
 def args():
 	parser = argparse.ArgumentParser()
@@ -26,10 +29,9 @@ def args():
 	parser.add_argument('--penality', default=1,type=int,help='penality for prediction score lower than 0.5')
 	parser.add_argument('--DB_file', default=None, help='polyA database file')
 	parser.add_argument('--depth', default=1, type=float,help='total number of mapped reads( in millions)')
-	
-  
+    parser.add_argument('--t', default = 30, type = int, help='number of thread')
+    
 	argv = parser.parse_args()
-
 	out_dir = argv.out_dir
 	input_file = argv.input_file
 	input_plus = argv.input_plus
@@ -44,11 +46,24 @@ def args():
 	penality  = argv.penality
 	DB_file = argv.DB_file
 	depth   = argv.depth
-	return out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,model,rst,threshold,penality,DB_file,depth
+    #
+    #thread = argv.t
+    #
+	return out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,model,rst,threshold,penality,DB_file,depth,thread
 
 
 
-def run_single_block(data,model,out_dir,rst,window,keep_temp,threshold,penality,DB_file):
+#def run_single_block(data,model,out_dir,rst,window,keep_temp,threshold,penality,DB_file):
+def run_single_block(input_list):
+    data = input_list[0]
+    model = input_list[1]
+    out_dir = input_list[2]
+    rst = input_list[3]
+    window = input_list[4]
+    keep_temp = input_list[5]
+    threshold = input_list[6]
+    penality = input_list[7]
+    DB_file = input_list[8]    
 	if 'wig' not in data:
 		baseName = data.split('/')[-1]
 		Evaluate(model,out_dir,rst,window,baseName,keep_temp)
@@ -78,9 +93,12 @@ def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name
 	
 	data_dir = out_dir+'/data'
 	data_files = glob.glob(data_dir+"/*")
+    block_input_list = ()
 	for data in data_files:
-		run_single_block(data,model,out_dir,rst,window,keep_temp,threshold,penality,DB_file)
-
+        block_input_list.append([data,model,out_dir,rst,window,keep_temp,threshold,penality,DB_file])
+	#	run_single_block(data,model,out_dir,rst,window,keep_temp,threshold,penality,DB_file)
+    with Pool(thread) as p:
+        p.map(run_single_block,block_input_list)
 	out_file = '%s/%s.predicted.txt' %(out_dir,name)
 	ww = open(out_file,'w')
 	if(DB_file is not None): 
