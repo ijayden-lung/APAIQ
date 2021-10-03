@@ -71,6 +71,7 @@ def run_single_block(input_list):
             forward_file=out_dir+"/maxSum/%s.forward.%d.%d.txt"%(baseName,threshold,penality)
             backward_file=out_dir+"/maxSum/%s.backward.%d.%d.txt"%(baseName,threshold,penality)
             os.system('rm %s %s'%(forward_file,backward_file))
+        print('Finished postprocessing...\n')
             
             
 def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,model,rst,threshold,penality,DB_file,depth,thread):
@@ -84,7 +85,7 @@ def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name
 	####Generate sliding windlows
     print("Generating blocks ...")
     gw_start_time = datetime.datetime.now()
-    Generate_windows(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,depth)
+    #Generate_windows(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,depth)
     gw_end_time = datetime.datetime.now()
     print("Gerate blocks used time: {}".format(gw_end_time - gw_start_time))
     data_dir = out_dir+'/data'
