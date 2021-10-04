@@ -112,22 +112,6 @@ def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name
 		pred_end_time = datetime.datetime.now()
 		print("Prediction used time: {}".format(pred_end_time - pred_start_time))
 
-	#minus_pos = Get_block_position(out_dir,input_minus,"-",window,1e6)
-	#block_input_list = []
-	#for baseName,block in blocks.items():
-	#for chromosome,strand,block_num,start,end in minus_pos:
-	#	input_file = input_minus
-	#	baseName = '%s.%s_%s_%s'%(name,chromosome,strand,block_num)
-	#	block_input_list.append([baseName,model,out_dir,rst,window,keep_temp,threshold,penality,DB_file,input_file,chromosome,strand,fa_file,depth,start,end])
-	#print("Predicting results ...")
-	#pred_start_time = datetime.datetime.now()
-	#with Pool(thread) as p:
-	#	p.map(run_single_block,block_input_list)
-	#pred_end_time = datetime.datetime.now()
-	#print("Prediction used time: {}".format(pred_end_time - pred_start_time))
-
-
-
 	out_file = '%s/%s.predicted.txt' %(out_dir,name)
 	ww = open(out_file,'w')
 	if(DB_file is not None): 
