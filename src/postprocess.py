@@ -122,7 +122,7 @@ def Postprocess(DB_file,baseName,threshold,penality,out_dir):
 	else:
 		nearest,nearestID = annotated(DB_file,pas_dict,chromosome,strand)
 		save_file(pas_dict,out,chromosome,strand,nearest,nearestID)
-	print("Finish postprocessing"+baseName)
+	#print("Finish postprocessing"+baseName)
 
 if __name__ == "__main__":
 	Postprocess(*args())
