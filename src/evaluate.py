@@ -165,8 +165,8 @@ def Evaluate(baseName,block,model,out_dir,rst,window,keep_temp):
 	OUT.close()
 	print("End Evaluation\n")
 
-	if (keep_temp != "yes"):
-		os.system('rm %s'%data)
+	
+	return 0
 
 
 			
