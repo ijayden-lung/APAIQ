@@ -85,6 +85,7 @@ def save_file(pas_dict,out,chro,srd,nearest=None,nearestID=None):
 			pasid = '%s:%s:%s'%(chro,key,srd)
 			OUT.write("%s\t%.1f\n"%(pasid,val))
 		OUT.close()
+	return 0
 
 def args():
 	### Argument Parser
@@ -123,6 +124,7 @@ def Postprocess(DB_file,baseName,threshold,penality,out_dir):
 		nearest,nearestID = annotated(DB_file,pas_dict,chromosome,strand)
 		save_file(pas_dict,out,chromosome,strand,nearest,nearestID)
 	#print("Finish postprocessing"+baseName)
+	return 0
 
 if __name__ == "__main__":
 	Postprocess(*args())

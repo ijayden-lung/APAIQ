@@ -12,6 +12,7 @@ from postprocess import Postprocess
 from multiprocessing import Pool
 import datetime
 import logging as log
+import gc
 #
 def args():
 	parser = argparse.ArgumentParser()
@@ -70,6 +71,10 @@ def run_single_block(input_list):
 	print("Evaluating blocks ...%s %d %s"%(baseName,start,end))
 	ev_start_time = datetime.datetime.now()
 	Evaluate(baseName,block,model,out_dir,rst,window,keep_temp)
+	
+	del block #destroyed the block reference
+	gc.collect() #manually run garbage collection process 
+
 	ev_end_time = datetime.datetime.now()
 	print("Evaluated blocks used time: {}\n".format(ev_end_time - ev_start_time))
 
@@ -119,6 +124,7 @@ def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name
 		block_input_list = []
 		for chromosome,strand,block_num,start,end in blocks:
 			baseName = '%s.%s_%s_%s'%(name,chromosome,strand,block_num)
+			print('%s\t%d\t%d'%(baseName,start,end))
 			block_input_list.append([baseName,model,out_dir,rst,window,keep_temp,threshold,penality,DB_file,input_file,chromosome,strand,fa_file,depth,start,end])
 		print("Predicting results ...")
 		pred_start_time = datetime.datetime.now()

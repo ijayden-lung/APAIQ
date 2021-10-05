@@ -84,6 +84,7 @@ def maxSum(file,threshold,penality,out):
 			end=coor
 
 	OUT.close()
+	return 0
 
 
 def args():
@@ -114,6 +115,7 @@ def Scan_Backward(baseName,threshold,penality,out_dir):
 
 	maxSum(predict,threshold,penality,out)
 	print("End backward scaning %s\n"%predict)
+	return 0
 
 if __name__ == "__main__":
 	Scan_Backward(*args())

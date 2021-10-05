@@ -5,8 +5,8 @@ import random
 import pandas as pd 
 import numpy as np
 from Bio.Seq import Seq
-import sys
 from TrimmedMean import TrimmedMean
+import gc
 #from extract_coverage_from_scanGenome import check
 
 def check(line1,line2,window):
@@ -166,6 +166,9 @@ def Evaluate(baseName,block,model,out_dir,rst,window,keep_temp):
 	print("End Evaluation\n")
 
 	
+	del seq_data,cov_data,pas_id #delete reference
+	gc.collect() #manually run garbage collection process 
+
 	return 0
 
 
