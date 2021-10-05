@@ -14,7 +14,7 @@ def get_predict_score(scan_file,Threshold):
 			(pas_id,maxPoint,maxPos,start,end,peak) = line.split('\t')
 			maxPoint = float(maxPoint)
 			maxPos   = float(maxPos)
-			peak     = float(peak)
+			peak	 = float(peak)
 			if(maxPoint < Threshold):
 				continue
 			pas_dict[maxPos] = [maxPoint,start,peak]
@@ -51,7 +51,7 @@ def annotated(DB_file,pas_dict,chromosome,strand):
 	start = int(start)-10000
 	end   = int(end)  + 10000
 	nearestID = dict()
-	nearest    = dict()
+	nearest	= dict()
 	if('chr' not in chromosome):
 		chromosome = 'chr'+chromosome
 	with open(DB_file,'r') as f:
@@ -105,6 +105,7 @@ def args():
 	return DB_file,baseName,threshold,penality,out_dir
 
 def Postprocess(DB_file,baseName,threshold,penality,out_dir):
+	print("Start postprocessing"+baseName)
 	_,block = baseName.split('.')
 	chromosome,strand,_ = block.split('_')
 
@@ -121,6 +122,7 @@ def Postprocess(DB_file,baseName,threshold,penality,out_dir):
 	else:
 		nearest,nearestID = annotated(DB_file,pas_dict,chromosome,strand)
 		save_file(pas_dict,out,chromosome,strand,nearest,nearestID)
+	print("Finish postprocessing"+baseName)
 
 if __name__ == "__main__":
 	Postprocess(*args())
