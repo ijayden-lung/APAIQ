@@ -166,7 +166,7 @@ def Evaluate(baseName,block,model,out_dir,rst,window,keep_temp):
 	print("End Evaluation\n")
 
 	
-	del seq_data,cov_data,pas_id #delete reference
+	del seq_data,cov_data,pas_id,pred #delete reference
 	gc.collect() #manually run garbage collection process 
 
 	return 0
