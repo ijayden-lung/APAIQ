@@ -9,6 +9,7 @@ import pprint
 import tempfile
 import re
 import argparse
+import gc
 #from pyfaidx import Fasta
 
 def get_genome_sequence(fa_file):
@@ -28,14 +29,14 @@ def Get_block_position(root_dir,input_file,strand,window,block_length):
 	end_pos   = 0
 	block_num = 0
 	count = 0
-	chromosome = ''
+	Chromosome = ''
+	window /= 1.5
+	window = int(window)
 	with open(input_file, "r") as bg_file:
 		lines = bg_file.readlines()
 		for i,line in enumerate(lines):
 			line = line.rstrip('\n')
 			chromosome,start,end,val = line.split('\t')
-			if(len(chromosome)>5 or 'Y' in chromosome or 'M' in chromosome):
-				continue
 			val = float(val)
 			pos1 = int(start)+1
 			pos2 = int(end)+1
@@ -60,6 +61,9 @@ def Get_block_position(root_dir,input_file,strand,window,block_length):
 				chromosome = 'chr'+chromosome
 
 			if chromosome not in chr_dict.keys():
+				end_pos = i
+				if(i>0 and len(Chromosome)<=5 and 'Y' not in Chromosome and 'M' not in Chromosome):
+					blocks.append((Chromosome,strand,block_num,start_pos,end_pos))
 				start_pos = i
 				block_num = 0
 				chr_dict[chromosome] = ''
@@ -67,14 +71,17 @@ def Get_block_position(root_dir,input_file,strand,window,block_length):
 			else:
 				if(count>block_length and pos1-pre_pos>1000):
 					end_pos = i
-					baseName = '%s_%s_%s'%(chromosome,strand,block_num)
-					blocks.append((chromosome,strand,block_num,start_pos,end_pos))
-					block_num += 1
-					start_pos = i
-					count = 0
+					#baseName = '%s_%s_%s'%(chromosome,strand,block_num)
+					if(len(Chromosome)<=5 and 'Y' not in Chromosome and 'M' not in Chromosome):
+						blocks.append((Chromosome,strand,block_num,start_pos,end_pos))
+						block_num += 1
+						start_pos = i
+						count = 0
 				count += pos2-pos1+extend1+extend2
+			Chromosome = chromosome
 	#baseName = '%s_%s_%s'%(chromosome,strand,block_num)
-	blocks.append((chromosome,strand,block_num,start_pos,len(lines)))
+	if(len(Chromosome)<=5 and 'Y' not in Chromosome and 'M' not in Chromosome):
+		blocks.append((Chromosome,strand,block_num,start_pos,len(lines)))
 	return blocks
 
 
@@ -82,7 +89,6 @@ def split_chr_bedGraph2(root_dir,input_file,chromosome,strand,window,fa_file,dep
 	window /= 1.5
 	window = int(window)
 	block = []
-	reference = dict()
 	pre_pos = 0
 	nex_pos = 0
 	reference = get_genome_sequence('%s.%s.fa'%(fa_file,chromosome))
@@ -127,6 +133,8 @@ def split_chr_bedGraph2(root_dir,input_file,chromosome,strand,window,fa_file,dep
 				if(pos>=pos1 and pos<pos2):
 					rpm = val/depth
 				block.append((pos,rpm,base))
+	del reference
+	gc.collect()
 	return block
 
 def split_chr_bedGraph(root_dir,input_file,strand,window,block_length,fa_file,depth,name):

@@ -133,7 +133,8 @@ def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name
 		with Pool(thread) as p:
 			#p.map(run_single_block,block_input_list)
 			time_lists = p.map(run_single_block,block_input_list)
-			p.close()
+			#p.close()
+			p.terminate()
 			p.join()
 			
 			for i,input_list in enumerate(block_input_list):
