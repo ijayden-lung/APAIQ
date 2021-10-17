@@ -124,19 +124,15 @@ def Postprocess(DB_file,baseName,threshold,penality,out_dir):
     forward_pas_dict = get_predict_score(forward_file,threshold)
     backward_file=out_dir+"/maxSum/%s.backward.%d.%d.txt"%(baseName,threshold,penality)
     backward_pas_dict = get_predict_score(backward_file,threshold)
-    if len(forward_pas_dict) > 0 and len(backward_pas_dict) > 0:
-        pas_dict = merge_predict_pos(forward_pas_dict,backward_pas_dict)
-        out=out_dir+"/maxSum/%s.bidirection.%d.%d.txt"%(baseName,threshold,penality)
-        if(DB_file is None):
-            save_file(pas_dict,out,chromosome,strand)
-        else:
-            nearest,nearestID = annotated(DB_file,pas_dict,chromosome,strand)
-            save_file(pas_dict,out,chromosome,strand,nearest,nearestID)
-        #print("Finish postprocessing"+baseName)
-        return 1
+    pas_dict = merge_predict_pos(forward_pas_dict,backward_pas_dict)
+    out=out_dir+"/maxSum/%s.bidirection.%d.%d.txt"%(baseName,threshold,penality)
+    if(DB_file is None):
+        save_file(pas_dict,out,chromosome,strand)
     else:
-        return 0
-    
+        nearest,nearestID = annotated(DB_file,pas_dict,chromosome,strand)
+        save_file(pas_dict,out,chromosome,strand,nearest,nearestID)
+    #print("Finish postprocessing"+baseName)
+    return 0
 
 if __name__ == "__main__":
     Postprocess(*args())

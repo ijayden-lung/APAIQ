@@ -2,19 +2,21 @@
 
 import sys,os
 import argparse
-import glob
+#import glob
 from bedgraph_to_blocks import get_block_position,Bedgraph_to_blocks
 from evaluate import Evaluate
 from scanTranscriptome_forward import Scan_Forward
 from scanTranscriptome_reverse import Scan_Backward
 from postprocess import Postprocess
 #
-from multiprocessing import Pool
+#from multiprocessing import Pool
+from concurrent.futures import ProcessPoolExecutor
 import datetime
-import logging as log
+#import logging as log
 import gc
 #
-
+# change multiprocessing to concurrent.futures to check the memory usage problem...
+# 
 def args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out_dir', default='out_dir', help='out dir')
@@ -58,52 +60,48 @@ def run_single_block(input_list):
     chromosome = block_pos[3]
     start = block_pos[4]
     end = block_pos[5]
-    print("Generating blocks ...%s %d %s"%(baseName,block_pos[4],block_pos[5]))
-    ####Generate sliding windlows
+    print("### Generating blocks ...%s %d %s"%(baseName,block_pos[4],block_pos[5]))
+    ####Generate blocks
     gw_start_time = datetime.datetime.now()
     blocks = Bedgraph_to_blocks(input_file,fa_file,window,depth,block_pos)
-    #ww = open(baseName,'w')
-    #for a,b,c in blocks:
-    #    ww.write('%s\t%s\t%s\n'%(a,b,c))
-    #ww.close()
     gw_end_time = datetime.datetime.now()
     print("Generate blocks used time: {}\n".format(gw_end_time - gw_start_time))
 
-    print("Evaluating blocks ...%s %d %s"%(baseName,start,end))
+    print("### Evaluating blocks ...%s %d %s"%(baseName,start,end))
     ev_start_time = datetime.datetime.now()
-    Evaluate(baseName,blocks,model,out_dir,rst,window,keep_temp)
-    
+    ev = Evaluate(baseName,blocks,model,out_dir,rst,window,keep_temp)
     del blocks #destroyed the block reference
-    gc.collect() #manually run garbage collection process 
-
+    gc.collect() #manually run garbage collection process
     ev_end_time = datetime.datetime.now()
-    print("Evaluated blocks used time: {}\n".format(ev_end_time - ev_start_time))
+    print("### Evaluated blocks used time: {}\n".format(ev_end_time - ev_start_time))
+    if ev != 0:
+        print("### Postprocessing blocks ...%s %d %s"%(baseName,start,end))
+        ps_start_time = datetime.datetime.now()
+        Scan_Forward(baseName,threshold,penality,out_dir)
+        Scan_Backward(baseName,threshold,penality,out_dir)
+        if(keep_temp != 'yes'):
+            predict_file = out_dir+'/predict/'+baseName+'.txt'
+            os.system('rm %s'%predict_file)
+        Postprocess(DB_file,baseName,threshold,penality,out_dir)
+        ps_end_time = datetime.datetime.now()
+        print("### Postprocessed blocks used time: {}\n".format(ps_end_time - ps_start_time))
 
-    print("Postprocessing blocks ...%s %d %s"%(baseName,start,end))
-    ps_start_time = datetime.datetime.now()
-    Scan_Forward(baseName,threshold,penality,out_dir)
-    Scan_Backward(baseName,threshold,penality,out_dir)
-    if(keep_temp != 'yes'):
-        predict_file = out_dir+'/predict/'+baseName+'.txt'
-        os.system('rm %s'%predict_file)
-    Postprocess(DB_file,baseName,threshold,penality,out_dir)
-    ps_end_time = datetime.datetime.now()
-    print("Postprocessed blocks used time: {}\n".format(ps_end_time - ps_start_time))
-
-    if(keep_temp != 'yes'):
-        forward_file=out_dir+"/maxSum/%s.forward.%d.%d.txt"%(baseName,threshold,penality)
-        backward_file=out_dir+"/maxSum/%s.backward.%d.%d.txt"%(baseName,threshold,penality)
-        os.system('rm %s %s'%(forward_file,backward_file))
-    #print('Finished postprocessing...%s\n'%baseName)
-    return [gw_end_time-gw_start_time,ev_end_time-ev_start_time,ps_end_time-ps_start_time]
-            
+        if(keep_temp != 'yes'):
+            forward_file=out_dir+"/maxSum/%s.forward.%d.%d.txt"%(baseName,threshold,penality)
+            backward_file=out_dir+"/maxSum/%s.backward.%d.%d.txt"%(baseName,threshold,penality)
+            os.system('rm %s %s'%(forward_file,backward_file))
+        #print('Finished postprocessing...%s\n'%baseName)
+        return [gw_end_time-gw_start_time,ev_end_time-ev_start_time,ps_end_time-ps_start_time]
+    else:
+        return [gw_end_time-gw_start_time,ev_end_time-ev_start_time,0]
+    
             
 #def main(out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,model,rst,threshold,penality,DB_file,depth,thread):
 if __name__ == '__main__':
     out_dir,input_file,input_plus,input_minus,fa_file,keep_temp,window,name,model,rst,threshold,penality,DB_file,depth,thread,block_length = args()
+    start_time = datetime.datetime.now()
     if(out_dir[-1] == '/'):
-        out_dir = out_dir[0:-1]
-        
+        out_dir = out_dir[0:-1]  
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     out_dir = out_dir+'/'+name
@@ -119,34 +117,29 @@ if __name__ == '__main__':
     for i in range(2):
         input_file = files[i]
         strand = strands[i]
-        print("Processing %s strand"%strand)
+        print("### Processing data in %s strand"%strand)
         #block_length = 1e5
         blocks_pos = get_block_position(input_file,window,block_length)
         block_input_list = []
         for bp in blocks_pos:
+            if 'chrY' in bp[3]:
+                continue
             baseName = '%s.%s_%s_%s'%(name,bp[3],strand,bp[0])
-            #if bp[4] > bp[5]:
-            #    print(bp)
-            log.write('Blocks:{}\n'.format('\t'.join(str(e) for e in bp)))
-            #print('%s\t%d\t%d'%(baseName,bp[4],bp[5]))
+            log.write('Blocks inf:{}\n'.format('\t'.join(str(e) for e in bp)))
             block_input_list.append([baseName,model,out_dir,rst,window,keep_temp,threshold,penality,DB_file,input_file,strand,depth,bp])
-        print("Predicting results ...")
+        print("### Predicting PAS in {}".format(strand))
         pred_start_time = datetime.datetime.now()
-        with Pool(thread) as p:
-            #p.map(run_single_block,block_input_list)
-            time_lists = p.map(run_single_block,block_input_list)
-            #p.close()
-            #p.terminate()
-            #p.join()
-            
-        for i,input_list in enumerate(block_input_list):
-            baseName = input_list[0]
-            gw_time,ev_time,ps_time = time_lists[i]
-            log.write('%s\t%s\t%s\t%s\n'%(baseName,str(gw_time),str(ev_time),str(ps_time)))
-            #    print('%s\t%s\t%s\t%s\n'%(baseName,str(gw_time),str(ev_time),str(ps_time)))
+        with ProcessPoolExecutor(max_workers=thread) as executor:
+            time_lists = executor.map(run_single_block,block_input_list)
+        for _i,t in enumerate(time_lists):
+            gw_time,ev_time,ps_time = t
+            log.write('Time used: %s\t%s\t%s\t%s\n'%(block_input_list[_i][0],str(gw_time),str(ev_time),str(ps_time)))
+#        with Pool(thread) as p:
+#            time_lists = p.map(run_single_block,block_input_list)
         pred_end_time = datetime.datetime.now()
-        print("Prediction used time: {}".format(pred_end_time - pred_start_time))
+        print("### Prediction PAS in {} used time: {}".format(strand,pred_end_time - pred_start_time))
     log.close()
+    
     out_file = '%s/%s.predicted.txt' %(out_dir,name)
     ww = open(out_file,'w')
     if(DB_file is not None): 
@@ -157,8 +150,8 @@ if __name__ == '__main__':
     os.system('cat %s/maxSum/*bidirection* >>%s'%(out_dir,out_file))
     if(keep_temp != 'yes'):
         os.system('rm -rf  %s/predict %s/maxSum'%(out_dir,out_dir))
-        
-    print("Job Done!")
+    end_time = datetime.datetime.now()    
+    print("### Job Done and the time used: {}".format(end_time - start_time))
     
 #if __name__ == '__main__':
 #    main(*args())

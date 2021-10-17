@@ -22,20 +22,20 @@ def maxSum(file,threshold,penality,out):
             predict[coor] = score
             coor2pas[coor] = pas_id
     
-    predict[-1] = 1
-    coor2pas[-1] = 'chr'
+    predict[100000000000] = 1
+    coor2pas[100000000000] = 'chr'
     coor_list = list(coor2pas.keys())
-    coor_list.sort(reverse=True)
+    coor_list.sort()
     sum=0
-    maxPos= coor_list[0]   ## position of peak
+    maxPos=0   ## position of peak
     maxPoint=0 ## score of peak
-    start= coor_list[0]      ## peak start
-    end = coor_list[0]    ## peak end
-    peak = coor_list[0] ## peak coor
+    start=0       ## peak start
+    end = 0    ## peak end
+    peak = 0 ## peak coor
     peak_score = 0  ##peak score
     for coor in coor_list:
         score = predict[coor]
-        if(coor-end<-1):
+        if(coor-end>1):
             if(maxPoint>threshold and sum>0):
                 #newpas_id = chromosome+":"+str(maxPos)+":"+strand
                 newpas_id = coor2pas[maxPos]
@@ -95,14 +95,15 @@ def args():
     parser.add_argument('--threshold', default=0,type=int,help='peak length lower than threshold will be fiter out')
     parser.add_argument('--penality', default=1,type=int,help='penality for prediction score lower than 0.5')
     args = parser.parse_args()
+
     baseName = args.baseName
     threshold = args.threshold
     penality = args.penality
     out_dir=args.out_dir
-
     return baseName,threshold,penality,out_dir
 
-def Scan_Backward(baseName,threshold,penality,out_dir):
+
+def Scan_Forward(baseName,threshold,penality,out_dir):
     if(out_dir[-1] == '/'):
         out_dir = out_dir[0:-1]
     new_dir = out_dir+'/maxSum'
@@ -110,12 +111,11 @@ def Scan_Backward(baseName,threshold,penality,out_dir):
         os.makedirs(new_dir) 
 
     predict=out_dir+'/predict/'+baseName+'.txt'
-    print("Start backward scaning %s"%predict)
-    out=out_dir+"/maxSum/%s.backward.%d.%d.txt"%(baseName,threshold,penality)
-
+    print("Start forward scaning %s"%predict)
+    out=out_dir+"/maxSum/%s.forward.%d.%d.txt"%(baseName,threshold,penality)
     maxSum(predict,threshold,penality,out)
-    print("End backward scaning %s\n"%predict)
+    print("End forward scaning %s\n"%predict)
     return 0
 
 if __name__ == "__main__":
-    Scan_Backward(*args())
+    Scan_Forward(*args())

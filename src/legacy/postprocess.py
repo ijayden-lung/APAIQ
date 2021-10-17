@@ -75,16 +75,8 @@ def save_file(pas_dict,out,chro,srd,nearest=None,nearestID=None):
         OUT=open(out,'w')
         for key,val in pas_dict.items():
             pasid = '%s:%s:%s'%(chro,key,srd)
-            try:
-                gtid = nearestID[key]
-            except:
-                gtid = 'NA' 
-            try:
-                gt_diff = nearest[key]
-            except:
-                gt_diff = 1e9
-            #gtid  = nearestID[key]
-            #gt_diff = nearest[key]
+            gtid  = nearestID[key]
+            gt_diff = nearest[key]
             OUT.write("%s\t%s\t%d\t%.1f\n"%(pasid,gtid,gt_diff,val))
         OUT.close()
     else:
@@ -124,19 +116,15 @@ def Postprocess(DB_file,baseName,threshold,penality,out_dir):
     forward_pas_dict = get_predict_score(forward_file,threshold)
     backward_file=out_dir+"/maxSum/%s.backward.%d.%d.txt"%(baseName,threshold,penality)
     backward_pas_dict = get_predict_score(backward_file,threshold)
-    if len(forward_pas_dict) > 0 and len(backward_pas_dict) > 0:
-        pas_dict = merge_predict_pos(forward_pas_dict,backward_pas_dict)
-        out=out_dir+"/maxSum/%s.bidirection.%d.%d.txt"%(baseName,threshold,penality)
-        if(DB_file is None):
-            save_file(pas_dict,out,chromosome,strand)
-        else:
-            nearest,nearestID = annotated(DB_file,pas_dict,chromosome,strand)
-            save_file(pas_dict,out,chromosome,strand,nearest,nearestID)
-        #print("Finish postprocessing"+baseName)
-        return 1
+    pas_dict = merge_predict_pos(forward_pas_dict,backward_pas_dict)
+    out=out_dir+"/maxSum/%s.bidirection.%d.%d.txt"%(baseName,threshold,penality)
+    if(DB_file is None):
+        save_file(pas_dict,out,chromosome,strand)
     else:
-        return 0
-    
+        nearest,nearestID = annotated(DB_file,pas_dict,chromosome,strand)
+        save_file(pas_dict,out,chromosome,strand,nearest,nearestID)
+    #print("Finish postprocessing"+baseName)
+    return 0
 
 if __name__ == "__main__":
     Postprocess(*args())

@@ -98,7 +98,6 @@ def dataProcessing(baseName,lines,window,rst):
                 continue
             #sequence,coverage = collpase(pas_id,lines[start:end+1],rst)
             sequence,coverage = collpase(strand,lines[start:end+1],rst)
-            #print(start,end,sequence,coverage)
             if(sequence!=0):
                 pas_id = '%s:%s:%s'%(chromosome,pos,strand)
                 sequence = list(sequence)
@@ -112,20 +111,16 @@ def dataProcessing(baseName,lines,window,rst):
                 #data2[i,:,:] =  coverage.reshape([-1,1])
                 #PASID[i] = pas_id
                 #index[i] = True
-    #print(data1)
-    if PASID != []:
-        data1 = np.stack(data1).reshape([-1, window, 4])
-        data2 = np.stack(data2).reshape([-1, window, 1])
-        PASID = np.array(PASID)
-        return data1 , data2,  PASID 
-    else:
-        return 0
+
+    data1 = np.stack(data1).reshape([-1, window, 4])
+    data2 = np.stack(data2).reshape([-1, window, 1])
+    PASID = np.array(PASID)
     #data1 = data1[index] 
     #data2 = data2[index]
     #PASID = PASID[index]
     
     #f.close()
-    
+    return data1 , data2,  PASID 
 
 def args():
     parser = argparse.ArgumentParser(description="identification of pAs cleavage site")
@@ -157,25 +152,27 @@ def Evaluate(baseName,block,model,out_dir,rst,window,keep_temp):
 
     print("Start processing data")
     #seq_data,cov_data,pas_id = dataProcessing(data,window,rst)
-    processed_data = dataProcessing(baseName,block,window,rst)
-    if processed_data != 0:
-        seq_data,cov_data,pas_id = processed_data
-        print("Finish processing data")
-        print("Start Evaluating %s"%baseName)
-        keras_Model = PolyA_CNN(window)
-        keras_Model.load_weights(model)
-        pred = keras_Model.predict({"seq_input": seq_data, "cov_input": cov_data})
-        OUT=open(out,'w')
-        for i in range(len(pas_id)):
-            OUT.write('%s\t%s\n'%(str(pas_id[i]),str(pred[i][0])))
-        OUT.close()
-        print("End Evaluation\n")
-        del seq_data,cov_data,pas_id,pred,keras_Model #delete reference
-        gc.collect() #manually run garbage collection process
-        return 1
-    else:
-        print("blocks {} don't have any avaible windown".format(baseName))
-        return 0
+    seq_data,cov_data,pas_id = dataProcessing(baseName,block,window,rst)
+    print("Finish processing data")
+    print("Start Evaluating %s"%baseName)
+
+    keras_Model = PolyA_CNN(window)
+    keras_Model.load_weights(model)
+    pred = keras_Model.predict({"seq_input": seq_data, "cov_input": cov_data})
+
+    OUT=open(out,'w')
+    for i in range(len(pas_id)):
+        OUT.write('%s\t%s\n'%(str(pas_id[i]),str(pred[i][0])))
+    OUT.close()
+    print("End Evaluation\n")
+
+    
+    del seq_data,cov_data,pas_id,pred,keras_Model #delete reference
+    gc.collect() #manually run garbage collection process 
+
+    return 0
+
+
             
 if __name__ == "__main__":
     Evaluate(*args())
