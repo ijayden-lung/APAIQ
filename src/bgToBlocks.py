@@ -54,18 +54,23 @@ def get_block_position(lines,win_width,block_length):
         else:
             _count += _pos2 - _pos1
             if _count > block_length:
-                _next_line = lines[_i + 1].rstrip('\n')
-                _next_chr,_next_s,_,_ = _next_line.split('\t')
-                if int(_next_s) + 1 - _pos2 > 2 * _ext_width:
-                    #print("change block: {}\t{}\t{}".format(_chr,_pos2,_next_s))
-                    _end_pos = _pos2 + _ext_width
-                    blocks.append([_block_num,_start_line,_i,_chr,_start_pos,_end_pos])
-                    _count = 0
-                    _block_num += 1
-                    _start_line = _i + 1
-                    _start_pos = int(_next_s) + 1 - _ext_width
+                ### get error when processing the last line ..lines[_i + 1] with error: list index out of range
+                if _i < len(lines) - 1:
+                    _next_line = lines[_i + 1].rstrip('\n')
+                    _next_chr,_next_s,_,_ = _next_line.split('\t')
+                    if int(_next_s) + 1 - _pos2 > 2 * _ext_width:
+                        #print("change block: {}\t{}\t{}".format(_chr,_pos2,_next_s))
+                        _end_pos = _pos2 + _ext_width
+                        blocks.append([_block_num,_start_line,_i,_chr,_start_pos,_end_pos])
+                        _count = 0
+                        _block_num += 1
+                        _start_line = _i + 1
+                        _start_pos = int(_next_s) + 1 - _ext_width
+                    else:
+                        continue
                 else:
-                    continue
+                    _end_pos = _pos2 + _ext_width
+                    #_end_line = 
             else:
                 _end_pos = _pos2 + _ext_width
         # add the last block 
@@ -104,13 +109,17 @@ def Bedgraph_to_blocks(lines,fa_file,win_width,depth,block_pos,chromosome):
         #print(_chr,_start,_end,_cov,_i)
         if _i == _start_line:
             _pos_start = _block_start
-            next_f = lines[_i + 1].rstrip('\n')
-            _,_next_start,_,_ = next_f.split('\t')
-            _next_start = int(_next_start)
-            if _next_start - _end < _ext_width:
-                _pos_end = _next_start
+            ### some block only have one line 
+            if _i != _end_line:
+                next_f = lines[_i + 1].rstrip('\n')
+                _,_next_start,_,_ = next_f.split('\t')
+                _next_start = int(_next_start)
+                if _next_start - _end < _ext_width:
+                    _pos_end = _next_start
+                else:
+                    _pos_end = _end + _ext_width
             else:
-                _pos_end = _end + _ext_width
+                _pos_end = _block_end - 1
         elif _i == _end_line:
             _pos_start = _start - _ext_width
             _pos_end = _block_end - 1
