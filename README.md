@@ -90,3 +90,6 @@ starnded
 	--keep_temp				use --keep_temp='yes', if you want to keep the temporary files.
 	
 
+## run regression
+	`python APAIQ.py --input_plus='demo/fwd.norm.bedGraph' --input_minus='demo/rev.norm.bedGraph'   --model='model/snu398_regression.ckpt' --factor_path='model/normalize_factor' --pas_file='demo/regression_chr21_input.bed'`
+
