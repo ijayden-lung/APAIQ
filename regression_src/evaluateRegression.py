@@ -12,9 +12,7 @@ def normalize(data,factor_dict):
     return data
 
 def inverse_normalize(rpm,factor_dict):
-    rpm = np.exp(rpm*factor_dict['label_std']+factor_dict['label_mean'])-factor_dict['pseudo_count']
-    if rpm <0:
-        rpm = 0
+    rpm = np.exp(rpm*factor_dict['label_std']+factor_dict['label_mean'])
     return rpm
 
 def read_factor(file_path):
